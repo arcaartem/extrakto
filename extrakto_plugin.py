@@ -3,6 +3,7 @@
 import os
 import platform
 import re
+import shlex
 import subprocess
 import shutil
 import sys
@@ -219,7 +220,12 @@ class ExtraktoPlugin:
     def open(self, path):
         if self.open_tool:
             subprocess.run(
-                ["tmux", "run-shell", "-b", f"cd -- $PWD; {self.open_tool} {path}"],
+                [
+                    "tmux",
+                    "run-shell",
+                    "-b",
+                    f'cd -- "$PWD"; {self.open_tool} {shlex.quote(path).replace("#", "##")}',
+                ],
                 check=True,
             )
 
@@ -458,7 +464,7 @@ class ExtraktoPlugin:
                         "send-keys",
                         "-t",
                         self.trigger_pane,
-                        f"{self.editor} -- {text}",
+                        f"{self.editor} -- {shlex.quote(text)}",
                         "C-m",
                     ],
                     check=True,
