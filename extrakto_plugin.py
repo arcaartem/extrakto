@@ -69,6 +69,14 @@ def get_option(option):
     return DEFAULT_OPTIONS[option] if option in DEFAULT_OPTIONS else ""
 
 
+def shell_quote(text):
+    if text == "~":
+        return text
+    if text.startswith("~/"):
+        return "~/" + shlex.quote(text[2:])
+    return shlex.quote(text)
+
+
 def fzf_sel(command, data):
     p = subprocess.Popen(
         command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None
@@ -224,7 +232,7 @@ class ExtraktoPlugin:
                     "tmux",
                     "run-shell",
                     "-b",
-                    f'cd -- "$PWD"; {self.open_tool} {shlex.quote(path).replace("#", "##")}',
+                    f'cd -- "$PWD"; {self.open_tool} {shell_quote(path).replace("#", "##")}',
                 ],
                 check=True,
             )
@@ -464,7 +472,7 @@ class ExtraktoPlugin:
                         "send-keys",
                         "-t",
                         self.trigger_pane,
-                        f"{self.editor} -- {shlex.quote(text)}",
+                        f"{self.editor} -- {shell_quote(text)}",
                         "C-m",
                     ],
                     check=True,
